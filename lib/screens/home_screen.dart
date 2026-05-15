@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:fp_frontend/services/notification_service.dart';
+import 'package:provider/provider.dart';
 
 import '../models/task_models.dart';
-import '../utils/id_utils.dart';
+import '../providers/task_provider.dart';
+import '../utils/id_utils.dart';  // Add this import
 import '../widgets/task_quadrant_tile.dart';
 import 'add_task_screen.dart';
 import 'edit_task_screen.dart';
@@ -22,118 +25,74 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final List<TaskModel> _tasks = [
-    TaskModel(
-      id: '1',
-      title: 'Finish assignment',
-      note: 'Complete the final draft and submit.',
-      quadrant: QuadrantType.importantUrgent,
-      isCompleted: false,
-    ),
-    TaskModel(
-      id: '2',
-      title: 'Buy groceries',
-      note: 'Milk, eggs, and vegetables.',
-      quadrant: QuadrantType.importantUrgent,
-      isCompleted: true,
-    ),
-    TaskModel(
-      id: '3',
-      title: 'Gym workout',
-      note: '45 minutes - strength + cardio.',
-      quadrant: QuadrantType.notImportantUrgent,
-      isCompleted: false,
-    ),
-    TaskModel(
-      id: '4',
-      title: 'Study Flutter',
-      note: 'Practice widgets + state management concepts.',
-      quadrant: QuadrantType.importantNotUrgent,
-      isCompleted: false,
-    ),
-  ];
-
   bool _notificationsEnabled = true;
 
-  List<TaskModel> _tasksFor(QuadrantType q) {
-    return _tasks.where((t) => t.quadrant == q).toList()
-      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
-  }
-
-  void _toggleTaskCompleted(TaskModel task, bool completed) {
-    setState(() {
-      final index = _tasks.indexWhere((t) => t.id == task.id);
-      if (index == -1) return;
-      _tasks[index] = _tasks[index].copyWith(isCompleted: completed);
+  @override
+  void initState() {
+    super.initState();
+    // Load tasks when the screen first opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<TaskProvider>(context, listen: false).loadTasks();
     });
-  }
-
-  void _deleteTask(TaskModel task) {
-    setState(() {
-      _tasks.removeWhere((t) => t.id == task.id);
-    });
-
-    if (mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Task deleted')));
-    }
   }
 
   Future<void> _openEditTask(TaskModel task) async {
+    final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+    
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => EditTaskScreen(
           initialTask: task,
-          onSave:
-              ({required title, required note, required quadrant, dueDate}) {
-                setState(() {
-                  final index = _tasks.indexWhere((t) => t.id == task.id);
-                  if (index == -1) return;
-                  final updated = _tasks[index].copyWith(
-                    title: title,
-                    note: note,
-                    quadrant: quadrant,
-                    dueDate: dueDate,
-                  );
-                  _tasks[index] = updated;
-                });
-
-                if (mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('Task updated')));
-                }
-              },
+          onSave: ({
+            required title,
+            required note,
+            required quadrant,
+            dueDate,
+          }) async {
+            final updated = task.copyWith(
+              title: title,
+              note: note,
+              quadrant: quadrant,
+              dueDate: dueDate,
+            );
+            await taskProvider.updateTask(task.id, updated);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Task updated')),
+              );
+            }
+          },
         ),
       ),
     );
   }
 
   Future<void> _openAddTask() async {
+    final taskProvider = Provider.of<TaskProvider>(context, listen: false);
+    
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => AddTaskScreen(
-          onSave:
-              ({required title, required note, required quadrant, dueDate}) {
-                setState(() {
-                  _tasks.add(
-                    TaskModel(
-                      id: IdUtils.generateId(),
-                      title: title,
-                      note: note,
-                      quadrant: quadrant,
-                      dueDate: dueDate,
-                    ),
-                  );
-                });
-
-                if (mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(const SnackBar(content: Text('Task added')));
-                }
-              },
+          onSave: ({
+            required title,
+            required note,
+            required quadrant,
+            dueDate,
+          }) async {
+            final task = TaskModel(
+              id: IdUtils.generateId(),
+              title: title,
+              note: note,
+              quadrant: quadrant,
+              dueDate: dueDate,
+            );
+            await taskProvider.addTask(task);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Task added')),
+              );
+            }
+          },
         ),
       ),
     );
@@ -156,6 +115,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // REMOVE THIS LINE: final tasks = taskProvider.tasks;
+    final taskProvider = Provider.of<TaskProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Eisenhower Matrix'),
@@ -174,8 +136,11 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
-            // Responsive: use 2 columns always, but spacing adapts.
             final padding = constraints.maxWidth < 380 ? 10.0 : 16.0;
+
+            if (taskProvider.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
             return Padding(
               padding: EdgeInsets.all(padding),
@@ -187,31 +152,35 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   TaskQuadrantTile(
                     quadrant: QuadrantType.importantUrgent,
-                    tasks: _tasksFor(QuadrantType.importantUrgent),
-                    onToggleTask: _toggleTaskCompleted,
+                    tasks: taskProvider.getTasksByQuadrant(QuadrantType.importantUrgent),
+                    onToggleTask: (task, completed) => 
+                        taskProvider.toggleTaskComplete(task.id, completed),
                     onEditTask: _openEditTask,
-                    onDeleteTask: _deleteTask,
+                    onDeleteTask: (task) => taskProvider.deleteTask(task.id),
                   ),
                   TaskQuadrantTile(
                     quadrant: QuadrantType.importantNotUrgent,
-                    tasks: _tasksFor(QuadrantType.importantNotUrgent),
-                    onToggleTask: _toggleTaskCompleted,
+                    tasks: taskProvider.getTasksByQuadrant(QuadrantType.importantNotUrgent),
+                    onToggleTask: (task, completed) => 
+                        taskProvider.toggleTaskComplete(task.id, completed),
                     onEditTask: _openEditTask,
-                    onDeleteTask: _deleteTask,
+                    onDeleteTask: (task) => taskProvider.deleteTask(task.id),
                   ),
                   TaskQuadrantTile(
                     quadrant: QuadrantType.notImportantUrgent,
-                    tasks: _tasksFor(QuadrantType.notImportantUrgent),
-                    onToggleTask: _toggleTaskCompleted,
+                    tasks: taskProvider.getTasksByQuadrant(QuadrantType.notImportantUrgent),
+                    onToggleTask: (task, completed) => 
+                        taskProvider.toggleTaskComplete(task.id, completed),
                     onEditTask: _openEditTask,
-                    onDeleteTask: _deleteTask,
+                    onDeleteTask: (task) => taskProvider.deleteTask(task.id),
                   ),
                   TaskQuadrantTile(
                     quadrant: QuadrantType.notImportantNotUrgent,
-                    tasks: _tasksFor(QuadrantType.notImportantNotUrgent),
-                    onToggleTask: _toggleTaskCompleted,
+                    tasks: taskProvider.getTasksByQuadrant(QuadrantType.notImportantNotUrgent),
+                    onToggleTask: (task, completed) => 
+                        taskProvider.toggleTaskComplete(task.id, completed),
                     onEditTask: _openEditTask,
-                    onDeleteTask: _deleteTask,
+                    onDeleteTask: (task) => taskProvider.deleteTask(task.id),
                   ),
                 ],
               ),

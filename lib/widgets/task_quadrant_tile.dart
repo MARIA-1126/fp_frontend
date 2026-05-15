@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/task_models.dart';
+import '../screens/quadrant_tasks_screen.dart';
 import 'task_tile.dart';
 
 class TaskQuadrantTile extends StatelessWidget {
@@ -15,7 +16,6 @@ class TaskQuadrantTile extends StatelessWidget {
 
   final QuadrantType quadrant;
   final List<TaskModel> tasks;
-
   final void Function(TaskModel task, bool completed) onToggleTask;
   final void Function(TaskModel task) onEditTask;
   final void Function(TaskModel task) onDeleteTask;
@@ -29,88 +29,103 @@ class TaskQuadrantTile extends StatelessWidget {
       base.withValues(alpha: 0.10),
     );
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 250),
-      curve: Curves.easeOut,
-      decoration: BoxDecoration(
-        color: cardBg,
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).shadowColor.withValues(alpha: 0.10),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => QuadrantTasksScreen(
+              quadrant: quadrant,
+              // Remove 'tasks' parameter
+              onToggleTask: onToggleTask,
+              onEditTask: onEditTask,
+              onDeleteTask: onDeleteTask,
+            ),
           ),
-        ],
-        border: Border.all(color: base.withValues(alpha: 0.18)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: base,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    quadrant.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                if (tasks.isNotEmpty)
+        );
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+        decoration: BoxDecoration(
+          color: cardBg,
+          borderRadius: BorderRadius.circular(22),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).shadowColor.withValues(alpha: 0.10),
+              blurRadius: 14,
+              offset: const Offset(0, 6),
+            ),
+          ],
+          border: Border.all(color: base.withValues(alpha: 0.18)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
+                    width: 10,
+                    height: 10,
                     decoration: BoxDecoration(
-                      color: base.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(999),
+                      shape: BoxShape.circle,
+                      color: base,
                     ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
                     child: Text(
-                      '${tasks.length}',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      quadrant.title,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w800,
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.8),
                       ),
                     ),
                   ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: tasks.isEmpty
-                  ? _EmptyState(quadrant: quadrant)
-                  : ListView.builder(
-                      padding: EdgeInsets.zero,
-                      itemCount: tasks.length,
-                      itemBuilder: (context, index) {
-                        final task = tasks[index];
-                        return TaskTile(
-                          task: task,
-                          onToggleCompleted: (v) => onToggleTask(task, v),
-                          onEdit: () => onEditTask(task),
-                          onDelete: () => onDeleteTask(task),
-                        );
-                      },
+                  if (tasks.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: base.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        '${tasks.length}',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.8),
+                        ),
+                      ),
                     ),
-            ),
-          ],
+                ],
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: tasks.isEmpty
+                    ? _EmptyState(quadrant: quadrant)
+                    : ListView.builder(
+                        padding: EdgeInsets.zero,
+                        itemCount: tasks.length,
+                        itemBuilder: (context, index) {
+                          final task = tasks[index];
+                          return TaskTile(
+                            task: task,
+                            onToggleCompleted: (v) => onToggleTask(task, v),
+                            onEdit: () => onEditTask(task),
+                            onDelete: () => onDeleteTask(task),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );

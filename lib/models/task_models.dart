@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 
-/// The 4 Eisenhower Matrix quadrants.
+part 'task_models.g.dart';
+
+@HiveType(typeId: 1)
 enum QuadrantType {
+  @HiveField(0)
   importantUrgent,
+  
+  @HiveField(1)
   importantNotUrgent,
+  
+  @HiveField(2)
   notImportantUrgent,
+  
+  @HiveField(3)
   notImportantNotUrgent,
 }
 
@@ -22,7 +32,6 @@ extension QuadrantTypeX on QuadrantType {
     }
   }
 
-  /// A distinct base color for each quadrant.
   Color get color {
     switch (this) {
       case QuadrantType.importantUrgent:
@@ -37,7 +46,7 @@ extension QuadrantTypeX on QuadrantType {
   }
 }
 
-/// Simple task model used for UI-only mock state.
+@HiveType(typeId: 0)
 class TaskModel {
   TaskModel({
     required this.id,
@@ -47,15 +56,32 @@ class TaskModel {
     this.dueDate,
     this.isCompleted = false,
     DateTime? createdAt,
+    this.order = 0, // Add order field with default 0
   }) : createdAt = createdAt ?? DateTime.now();
 
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   final String title;
+
+  @HiveField(2)
   final String? note;
+
+  @HiveField(3)
   final QuadrantType quadrant;
+
+  @HiveField(4)
   final DateTime? dueDate;
+
+  @HiveField(5)
   final bool isCompleted;
+
+  @HiveField(6)
   final DateTime createdAt;
+
+  @HiveField(7)
+  final int order; // Add order field
 
   TaskModel copyWith({
     String? id,
@@ -65,6 +91,7 @@ class TaskModel {
     DateTime? dueDate,
     bool? isCompleted,
     DateTime? createdAt,
+    int? order,
   }) {
     return TaskModel(
       id: id ?? this.id,
@@ -74,6 +101,7 @@ class TaskModel {
       dueDate: dueDate ?? this.dueDate,
       isCompleted: isCompleted ?? this.isCompleted,
       createdAt: createdAt ?? this.createdAt,
+      order: order ?? this.order,
     );
   }
 }
