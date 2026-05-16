@@ -6,6 +6,7 @@ import 'models/task_models.dart';
 import 'providers/task_provider.dart';  // Add this
 import 'screens/home_screen.dart';
 // import 'services/notification_service.dart';
+import 'screens/splash_screen.dart';
 import 'themes/app_theme.dart';
 
 void main() async {
@@ -31,7 +32,7 @@ class EisenhowerApp extends StatefulWidget {
 }
 
 class _EisenhowerAppState extends State<EisenhowerApp> {
-  bool _isDarkMode = false;
+  final bool _isDarkMode = false;
 
   @override
   Widget build(BuildContext context) {
@@ -45,12 +46,13 @@ class _EisenhowerAppState extends State<EisenhowerApp> {
         darkTheme: AppTheme.dark(),
         themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
         debugShowCheckedModeBanner: false,
-        home: HomeScreen(
-          isDarkMode: _isDarkMode,
-          onToggleDarkMode: (v) {
-            setState(() => _isDarkMode = v);
-          },
-        ),
+        home: const SplashScreen(),
+        // home: HomeScreen(
+        //   isDarkMode: _isDarkMode,
+        //   onToggleDarkMode: (v) {
+        //     setState(() => _isDarkMode = v);
+        //   },
+        // ),
       ),
     );
   }

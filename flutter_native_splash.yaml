@@ -1,0 +1,11 @@
+flutter_native_splash:
+  color: "#FFFFFF"
+  android: true
+  ios: true
+  web: false
+  
+  # Use a simple background color - we'll add Lottie on top
+  # Don't use an image here, let Lottie handle the animation
+  
+  android_12:
+    color: "#FFFFFF"
