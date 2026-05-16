@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/task_provider.dart';
-import '../services/notification_service.dart';
+//import '../services/notification_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -22,12 +22,12 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  late bool _notificationsEnabled;
+  // late bool _notificationsEnabled;
 
   @override
   void initState() {
     super.initState();
-    _notificationsEnabled = widget.notificationsEnabled;
+    //_notificationsEnabled = widget.notificationsEnabled;
   }
 
   @override
@@ -52,26 +52,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           
           // Notifications Toggle
-          SwitchListTile(
-            title: const Text('Enable Notifications'),
-            subtitle: const Text('Receive daily reminders at 7 PM and 9 AM'),
-            value: _notificationsEnabled,
-            onChanged: (value) async {
-              setState(() {
-                _notificationsEnabled = value;
-              });
-              widget.onNotificationsChanged(value);
+          // SwitchListTile(
+          //   title: const Text('Enable Notifications'),
+          //   subtitle: const Text('Receive daily reminders at 7 PM and 9 AM'),
+          //   // value: _notificationsEnabled,
+          //   onChanged: (value) async {
+          //     setState(() {
+          //       //_notificationsEnabled = value;
+          //     });
+          //     widget.onNotificationsChanged(value);
               
-              if (value) {
-                // Schedule notifications with the current pending count
-                await NotificationService().scheduleEveningReminder(pendingCount);
-                await NotificationService().scheduleMorningReminder();
-              } else {
-                // Cancel all notifications
-                await NotificationService().cancelAllNotifications();
-              }
-            },
-          ),
+          //     if (value) {
+          //       // Schedule notifications with the current pending count
+          //       // await NotificationService().scheduleEveningReminder(pendingCount);
+          //       // await NotificationService().scheduleMorningReminder();
+          //     } else {
+          //       // Cancel all notifications
+          //       // await NotificationService().cancelAllNotifications();
+          //     }
+          //   },
+          // ),
           
           const Divider(),
           
