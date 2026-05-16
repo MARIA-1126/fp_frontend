@@ -5,8 +5,14 @@ import '../providers/task_provider.dart';
 import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  const SplashScreen({
+    super.key,
+    required this.isDarkMode,
+    required this.onToggleDarkMode,
+    });
 
+  final bool isDarkMode;
+  final ValueChanged<bool> onToggleDarkMode;
   @override
   State<SplashScreen> createState() => _SplashScreenState();
 }

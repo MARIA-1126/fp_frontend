@@ -4,8 +4,13 @@ import '../models/task_models.dart';
 import '../widgets/task_form_fields.dart';
 
 class AddTaskScreen extends StatefulWidget {
-  const AddTaskScreen({super.key, required this.onSave});
+  const AddTaskScreen({
+    super.key, 
+    required this.onSave,
+    this.initialQuadrant
+    });
 
+final QuadrantType? initialQuadrant; 
   final void Function({
     required String title,
     required String? note,
@@ -26,6 +31,12 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
 
   QuadrantType _selectedQuadrant = QuadrantType.importantUrgent;
   DateTime? _dueDate;
+
+@override
+  void initState() {
+    super.initState();
+    _selectedQuadrant = widget.initialQuadrant ?? QuadrantType.importantUrgent;
+  }
 
   @override
   void dispose() {

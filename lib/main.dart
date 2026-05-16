@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:provider/provider.dart';  // Add this
+import 'package:provider/provider.dart';
 
 import 'models/task_models.dart';
-import 'providers/task_provider.dart';  // Add this
+import 'providers/task_provider.dart';
 import 'screens/home_screen.dart';
 // import 'services/notification_service.dart';
 import 'screens/splash_screen.dart';
@@ -11,16 +11,13 @@ import 'themes/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Hive
   await Hive.initFlutter();
   Hive.registerAdapter(TaskModelAdapter());
   Hive.registerAdapter(QuadrantTypeAdapter());
   await Hive.openBox<TaskModel>('tasksBox');
-  
-  // Initialize notifications
-  // await NotificationService().initialize();
-  
+
   runApp(const EisenhowerApp());
 }
 
@@ -32,27 +29,31 @@ class EisenhowerApp extends StatefulWidget {
 }
 
 class _EisenhowerAppState extends State<EisenhowerApp> {
-  final bool _isDarkMode = false;
+  // ✅ Remove 'final' so it can be changed
+  bool _isDarkMode = false;
+
+  // ✅ Add this method to toggle dark mode
+  void _toggleDarkMode(bool value) {
+    setState(() {
+      _isDarkMode = value;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(  // Use MultiProvider
-      providers: [
-        ChangeNotifierProvider(create: (_) => TaskProvider()),
-      ],
+    return MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => TaskProvider())],
       child: MaterialApp(
         title: 'Eisenhower Matrix Task Manager',
         theme: AppTheme.light(),
         darkTheme: AppTheme.dark(),
         themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
         debugShowCheckedModeBanner: false,
-        home: const SplashScreen(),
-        // home: HomeScreen(
-        //   isDarkMode: _isDarkMode,
-        //   onToggleDarkMode: (v) {
-        //     setState(() => _isDarkMode = v);
-        //   },
-        // ),
+        // ✅ Use HomeScreen directly with the toggle function
+        home: SplashScreen(
+          isDarkMode: _isDarkMode,
+          onToggleDarkMode: _toggleDarkMode, // ✅ Pass the toggle method
+        ),
       ),
     );
   }

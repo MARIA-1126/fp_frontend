@@ -37,9 +37,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final pendingCount = taskProvider.getPendingTaskCount();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
+      appBar: AppBar(title: const Text('Settings')),
       body: ListView(
         children: [
           const SizedBox(height: 16),
@@ -48,9 +46,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: const Text('Dark Mode'),
             subtitle: const Text('Switch between light and dark theme'),
             value: widget.isDarkMode,
-            onChanged: widget.onDarkModeChanged,
+            onChanged: (value) {
+              widget.onDarkModeChanged(value);
+            },
           ),
-          
+
           // Notifications Toggle
           // SwitchListTile(
           //   title: const Text('Enable Notifications'),
@@ -61,7 +61,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           //       //_notificationsEnabled = value;
           //     });
           //     widget.onNotificationsChanged(value);
-              
+
           //     if (value) {
           //       // Schedule notifications with the current pending count
           //       // await NotificationService().scheduleEveningReminder(pendingCount);
@@ -72,16 +72,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           //     }
           //   },
           // ),
-          
           const Divider(),
-          
+
           // Notification times info
           ListTile(
             leading: const Icon(Icons.notifications_active),
             title: const Text('Reminder Times'),
             subtitle: const Text('Morning: 9:00 AM | Evening: 7:00 PM'),
           ),
-          
+
           // Show pending tasks count
           ListTile(
             leading: const Icon(Icons.task_alt),
