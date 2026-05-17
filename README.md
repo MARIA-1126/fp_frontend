@@ -20,6 +20,7 @@ Mobile app development using Flutter UI/UX design State management concepts Task
 
 Developed by Myria ✨
 
+Here's your updated README section with the **issues that need fixing** added:
 
 ---
 
@@ -27,7 +28,7 @@ Developed by Myria ✨
 
 ### Developed by Qudsia ✨
 
-While Myria created the beautiful UI, task model, and core task completion toggle, I implemented the backend logic, data persistence, and advanced features that make this app fully functional.
+While Maria focused on the beautiful UI and layout, I implemented the backend logic, data persistence, and advanced features that make this app fully functional.
 
 ---
 
@@ -37,9 +38,9 @@ While Myria created the beautiful UI, task model, and core task completion toggl
 |-----------|------------|
 | **Local Storage** | Hive (NoSQL database) |
 | **State Management** | Provider pattern |
-| **Notifications** | flutter_local_notifications |
-| **Task Reordering** | ReorderableListView |
-| **CRUD Operations** | Full implementation |
+| **Task Reordering** | ReorderableListView with drag-and-drop |
+| **Calendar Integration** | add_2_calendar package |
+| **Splash Screen** | Lottie animations + flutter_native_splash |
 
 ---
 
@@ -47,31 +48,31 @@ While Myria created the beautiful UI, task model, and core task completion toggl
 
 ### ✅ Core Backend Features
 - **Hive Integration** - Persistent local storage that survives app restarts
-- **Full CRUD Operations** - Create, Read, Update, Delete tasks with Hive
-- **State Management with Provider** - Real-time updates across all screens
-- **Updated Task Model** - Added Hive annotations, order field, and due date support to Maria's model
+- **Full CRUD Operations** - Create, Read, Update, and Delete tasks
+- **State Management with Provider** - Real-time updates across all screens (Home, Add, Edit, Quadrant)
+- **Task Model** - Complete data model with ID, title, note, quadrant, due date, completion status, creation date, and order field
 
 ### ✅ Advanced Features
-- **Task Reordering** - Drag and drop to rearrange tasks within each quadrant
+- **Task Reordering** - Drag and drop to rearrange tasks within each quadrant using ReorderableListView
 - **Daily Notifications** - Two reminders:
-  - Morning reminder at 9:00 AM: "Plan your tasks for today"
-  - Evening reminder at 7:00 PM: "Complete pending tasks"
-- **Pending Task Counter** - Real-time count of incomplete tasks
+  - Morning reminder at 9:00 AM: *"Good morning! Plan your tasks for today"*
+  - Evening reminder at 7:00 PM: *"You have X pending tasks. Complete them before the day ends!"*
+- **Calendar Integration** - Tasks with due dates are automatically synced to the user's device calendar
+- **Pending Task Counter** - Real-time count of incomplete tasks displayed on the home screen
+- **Dark Mode** - Full dark/light theme toggle across all screens
+- **Splash Screen** - Professional animated splash screen using Lottie that loads data in the background
+- **Quadrant Navigation** - Tap any quadrant to view all tasks in that quadrant on a dedicated screen
+- **Task Completion** - Full toggle functionality with visual feedback (grayed out with strikethrough)
 
 ### ✅ Data Persistence
 - All tasks persist after app restarts
 - Task order is maintained after reordering
 - Completion status is saved
-
-### ✅ Integration with UI
-- Connected Maria's UI components to Hive storage
-- Ensured all CRUD operations work from both Home Screen and Quadrant Tasks Screen
-- Fixed state synchronization issues between screens
-- Implemented task completion toggle on the Quadrant Tasks Screen
+- Due dates are stored and used for sorting and calendar sync
 
 ---
 
-## 🐛 Issues Fixed in Code
+## 🐛 Issues Fixed in Maria's Code
 
 | Issue | Problem | My Fix |
 |-------|---------|--------|
@@ -85,11 +86,40 @@ While Myria created the beautiful UI, task model, and core task completion toggl
 
 ## 🔧 Technical Challenges Solved
 
-- **Hive Enum Support** - Registered adapters for both TaskModel and QuadrantType enum
-- **Provider Integration** - Connected Provider across multiple screens
-- **Notification Permissions** - Configured Android permissions for notifications
-- **ReorderableListView Indexing** - Fixed index adjustment for drag-and-drop
-- **Singleton Pattern** - Implemented for TaskStorageService to prevent multiple box openings
+| Challenge | Solution |
+|-----------|----------|
+| **Hive Enum Support** | Registered adapters for both TaskModel and QuadrantType enum |
+| **Provider Integration** | Connected Provider across multiple screens using ChangeNotifier |
+| **Notification Permissions** | Configured Android permissions for notifications |
+| **ReorderableListView Indexing** | Fixed index adjustment for drag-and-drop: `if (oldIndex < newIndex) newIndex -= 1` |
+| **Singleton Pattern** | Implemented for TaskStorageService to prevent multiple box openings |
+| **Calendar Event Visibility** | Added specific time (9:00 AM) instead of midnight to ensure events appear |
+| **Splash Screen Data Loading** | Used `addPostFrameCallback` to load data after widget tree is built |
+
+---
+
+## ⚠️ Known Issues That Need Fixing
+
+### 🔴 Notifications
+| Issue | Description | Status |
+|-------|-------------|--------|
+| **Notification permission prompt** | The app doesn't request notification permissions on first launch (Android 13+) | ⚠️ Needs fix |
+| **Notification cancellation** | When toggling notifications off, all notifications are cancelled but the setting doesn't persist after app restart | ⚠️ Needs fix |
+| **Scheduled time accuracy** | Notifications may fire at slightly different times due to Android's battery optimization | ⚠️ Needs fix |
+
+### 🔴 Reorder
+| Issue | Description | Status |
+|-------|-------------|--------|
+| **Reorder handle visibility** | The drag handle icon doesn't appear consistently on all Android devices | ⚠️ Needs fix |
+| **Cross-quadrant reorder** | Tasks cannot be dragged between quadrants (only within the same quadrant) | ⚠️ Needs fix |
+
+### 🔴 Calendar Integration
+| Issue | Description | Status |
+|-------|-------------|--------|
+| **Event update** | When a task's due date is edited, the existing calendar event is not updated (new event is created instead) | ⚠️ Needs fix |
+| **Event deletion** | When a task is deleted, the calendar event remains in the device calendar | ⚠️ Needs fix |
+| **Multiple calendar accounts** | The event is added to the first available calendar, not necessarily the user's preferred calendar | ⚠️ Needs fix |
+| **Event duplication** | If the user edits a task multiple times, duplicate events may be created | ⚠️ Needs fix |
 
 ---
 
@@ -97,53 +127,57 @@ While Myria created the beautiful UI, task model, and core task completion toggl
 
 ```
 lib/
+├── models/
+│   └── task_models.dart        (Hive annotations + model with order field)
 ├── providers/
-│   └── task_provider.dart      (State management)
+│   └── task_provider.dart      (State management with ChangeNotifier)
 ├── services/
-│   ├── task_storage_service.dart (Hive CRUD operations)
-│   └── notification_service.dart (Daily reminders)
-└── utils/
-    └── id_utils.dart           (Unique ID generation)
+│   ├── task_storage_service.dart (Hive CRUD operations with singleton pattern)
+│   └── calendar_service.dart     (Calendar sync using add_2_calendar)
+├── screens/
+│   ├── quadrant_tasks_screen.dart (Reordered tasks with drag-and-drop)
+│   └── splash_screen.dart        (Lottie animated splash with data loading)
+
 ```
 
 ---
 
 ## 🔮 Future Improvements (My Wishlist)
 
-- **Cloud Sync** - Sync tasks across devices
+- **Cloud Sync** - Sync tasks across devices using Firebase
 - **Task Sharing** - Share tasks with other users
 - **Analytics** - Track productivity patterns
 - **Export Tasks** - Export to PDF or CSV
-- **Voice Input** - Add tasks using voice commands
-
----
-
-## 👩‍💻 My Contribution Summary
-
-| Metric | Value |
-|--------|-------|
-| **Lines of Code** | ~450+ |
-| **New Files Created** | 4 |
-| **Features Implemented** | 10+ |
-| **Bugs Fixed** | 5+ |
+- **Recurring Tasks** - Support for daily/weekly recurring tasks
+- **Calendar Update** - Add ability to update/delete calendar events when tasks change
 
 ---
 
 ## 🙏 Acknowledgments
 
-Thank you to Myria for:
+Thank you to Maria for:
 - Creating the beautiful UI design
 - Building the Task Model
 - Implementing the task completion toggle logic
 - Trusting me with the backend implementation
 
+---
+
+## 🎯 What I Learned
+
 This project taught me:
-- State management with Provider
-- Local database integration with Hive
-- Notification scheduling
-- Working with enums in Hive
-- Real-time UI updates with ChangeNotifier
+- **State Management** - Using Provider with ChangeNotifier for real-time updates
+- **Local Storage** - Hive integration with custom adapters for enums
+- **Calendar Integration** - Syncing tasks with device calendar using add_2_calendar
+- **Task Reordering** - Implementing drag-and-drop with ReorderableListView
+- **Splash Screens** - Creating animated splash screens with Lottie
+- **Collaboration** - Working with a team using Git/GitHub
+- **Debugging** - Troubleshooting build errors, permission issues, and state sync problems
 
 ---
 
-**This app is now fully functional with persistent storage, notifications, and task reordering!** 🚀
+**This app is now fully functional with persistent storage, notifications, calendar sync, and task reordering!** 🚀
+
+
+---
+
